@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ian Nalwari — Network Engineer</title>
+<meta name="description" content="Ian Nalwari — Network Engineer. ISP infrastructure, MikroTik RouterOS, and web development.">
+<style>
+  :root{
+    --bg: #0E161F;
+    --panel: #141F2B;
+    --panel-line: #26333F;
+    --text: #E7EEF4;
+    --muted: #90A0AF;
+    --amber: #E8A33D;
+    --teal: #4FB8AE;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+    --sans: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 48px;}
+  @media (min-width:860px){ .wrap{padding:0 64px;} }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky; top:0; z-index:40;
+    background:rgba(14,22,31,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--panel-line);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .brand{
+    font-family:var(--mono); font-size:15px; letter-spacing:0.02em; color:var(--text);
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 8px var(--teal);}
+  .navlinks{display:flex; gap:28px; font-size:14px;}
+  .navlinks a{color:var(--muted); text-decoration:none; transition:color .15s;}
+  .navlinks a:hover{color:var(--text);}
+  .navtoggle{display:none; background:none; border:none; color:var(--text); font-size:22px; cursor:pointer;}
+
+  .navlinks .nav-cta{display:none;}
+  @media (max-width:720px){
+    .navlinks{
+      position:absolute; top:64px; left:0; right:0;
+      background:var(--panel); border-bottom:1px solid var(--panel-line);
+      flex-direction:column; padding:4px 0 20px; gap:0;
+      display:none;
+    }
+    .navlinks.open{display:flex;}
+    .navtoggle{display:block;}
+    .navlinks a:not(.nav-cta){
+      padding:15px 28px; border-top:1px solid var(--panel-line);
+      color:var(--text); font-size:15px;
+    }
+    .navlinks .nav-cta{
+      display:block; margin:16px 28px 0; text-align:center;
+      background:var(--amber); color:#171006; font-weight:600;
+      padding:12px 18px; border-radius:3px; text-decoration:none; font-size:14px;
+    }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{padding-top:88px; padding-bottom:64px; position:relative; overflow:hidden;}
+  .hero-grid{
+    display:grid; grid-template-columns:1.2fr 1fr; gap:48px; align-items:center;
+  }
+  @media (max-width:860px){ .hero-grid{grid-template-columns:1fr;} }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:13px; color:var(--teal);
+    display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .eyebrow::before{content:''; width:20px; height:1px; background:var(--teal);}
+
+  h1{
+    font-size:clamp(34px,5vw,54px); font-weight:600; letter-spacing:-0.01em; line-height:1.08;
+    margin-bottom:20px;
+  }
+  h1 span{color:var(--amber);}
+
+  .lede{color:var(--muted); font-size:17px; max-width:46ch; margin-bottom:32px;}
+
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:11px 20px; border-radius:3px; font-size:14px; font-weight:500;
+    text-decoration:none; border:1px solid transparent; transition:all .15s;
+  }
+  .btn-primary{background:var(--amber); color:#171006;}
+  .btn-primary:hover{background:#f0b658;}
+  .btn-ghost{border-color:var(--panel-line); color:var(--text);}
+  .btn-ghost:hover{border-color:var(--teal); color:var(--teal);}
+
+  /* Network topology graphic */
+  .topo{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:6px;
+    padding:22px; font-family:var(--mono); font-size:12px; color:var(--muted);
+  }
+  .topo-head{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--panel-line);
+  }
+  .topo-head .lbl{color:var(--text); font-size:12px;}
+  .status-pill{
+    display:inline-flex; align-items:center; gap:6px; color:var(--teal); font-size:11px;
+  }
+  .status-pill i{width:6px; height:6px; border-radius:50%; background:var(--teal); display:inline-block;}
+  svg.topo-svg{width:100%; height:auto; display:block; margin:12px 0;}
+  .topo-svg .node{fill:var(--panel); stroke:var(--panel-line); stroke-width:1.5;}
+  .topo-svg .node-core{stroke:var(--amber);}
+  .topo-svg .link{stroke:var(--panel-line); stroke-width:1.5;}
+  .topo-svg .link-active{stroke:var(--teal); stroke-dasharray:4 3;}
+  .topo-svg text{fill:var(--muted); font-family:var(--mono); font-size:8px;}
+  .topo-rows{display:flex; flex-direction:column; gap:6px; margin-top:6px;}
+  .topo-rows div{display:flex; justify-content:space-between;}
+  .topo-rows span:last-child{color:var(--text);}
+
+  /* ---------- Section shell ---------- */
+  section{padding:64px 0; border-top:1px solid var(--panel-line);}
+  .sec-head{display:flex; align-items:baseline; gap:14px; margin-bottom:36px;}
+  .sec-num{font-family:var(--mono); color:var(--amber); font-size:14px;}
+  .sec-title{font-size:26px; font-weight:600; letter-spacing:-0.01em;}
+
+  /* ---------- About ---------- */
+  .about-body{max-width:62ch; color:var(--muted); font-size:16px;}
+  .about-body strong{color:var(--text); font-weight:500;}
+
+  /* ---------- Experience ---------- */
+  .job{display:grid; grid-template-columns:200px 1fr; gap:28px;}
+  @media (max-width:720px){ .job{grid-template-columns:1fr; gap:10px;} }
+  .job-meta{font-family:var(--mono); font-size:13px; color:var(--muted); line-height:1.9;}
+  .job-role{font-size:19px; font-weight:600; margin-bottom:4px;}
+  .job-org{color:var(--amber); font-size:15px; margin-bottom:16px;}
+  .job ul{list-style:none;}
+  .job li{
+    position:relative; padding-left:20px; margin-bottom:11px; color:var(--muted); font-size:15px;
+  }
+  .job li::before{
+    content:''; position:absolute; left:0; top:9px; width:8px; height:1px; background:var(--teal);
+  }
+
+  /* ---------- Projects ---------- */
+  .projects{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:720px){ .projects{grid-template-columns:1fr;} }
+  .card{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:6px; padding:26px;
+  }
+  .card-tag{font-family:var(--mono); font-size:11px; color:var(--teal); margin-bottom:12px;}
+  .card-link{
+    display:inline-block; margin-top:16px; font-size:13.5px; color:var(--teal);
+    text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--panel-line);
+  }
+  .card-link:hover{text-decoration-color:var(--teal);}
+  .card h3{font-size:18px; font-weight:600; margin-bottom:10px;}
+  .card p{color:var(--muted); font-size:14.5px; margin-bottom:16px;}
+  .tag-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .tag{
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    border:1px solid var(--panel-line); padding:4px 9px; border-radius:3px;
+  }
+
+  /* ---------- Skills ---------- */
+  .skills-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:28px 40px;}
+  @media (max-width:720px){ .skills-grid{grid-template-columns:1fr;} }
+  .skill-group .lbl{
+    font-family:var(--mono); font-size:12px; color:var(--amber); margin-bottom:12px;
+  }
+  .skill-list{display:flex; flex-wrap:wrap; gap:8px;}
+  .skill-list span{
+    font-size:13.5px; color:var(--text); background:var(--panel);
+    border:1px solid var(--panel-line); padding:6px 12px; border-radius:3px;
+  }
+
+  /* ---------- Education ---------- */
+  .edu-role{font-size:18px; font-weight:600;}
+  .edu-org{color:var(--amber); font-size:14.5px; margin:4px 0 10px;}
+  .edu-meta{font-family:var(--mono); font-size:13px; color:var(--muted); margin-bottom:14px;}
+  .edu-list{color:var(--muted); font-size:14.5px;}
+
+  /* ---------- Contact ---------- */
+  .contact-panel{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:6px;
+    padding:40px; display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
+  }
+  .contact-panel h2{font-size:24px; font-weight:600; margin-bottom:8px;}
+  .contact-panel p{color:var(--muted); font-size:15px;}
+  .contact-links{display:flex; gap:14px; flex-wrap:wrap;}
+
+  .socials{margin-top:28px;}
+  .socials .lbl{font-family:var(--mono); font-size:12px; color:var(--amber); margin-bottom:14px;}
+  .social-list{display:flex; flex-wrap:wrap; gap:10px;}
+  .social-list a{
+    font-size:13.5px; color:var(--text); text-decoration:none;
+    background:var(--panel); border:1px solid var(--panel-line);
+    padding:9px 16px; border-radius:3px; transition:all .15s;
+  }
+  .social-list a:hover{border-color:var(--teal); color:var(--teal);}
+
+  footer{padding:28px 0; text-align:center; font-family:var(--mono); font-size:12px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <div class="brand">My Portfolio</div>
+    <div class="navlinks" id="navlinks">
+      <a href="#about">About</a>
+      <a href="#offer">What I Offer</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+      <a href="#education">Education</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact" class="nav-cta">Get in touch</a>
+    </div>
+    <button class="navtoggle" id="navtoggle" aria-label="Toggle menu">☰</button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Network Engineer, Nairobi, Kenya</div>
+        <h1>Ian Nalwari keeps a fiber ISP <span>online, alone.</span></h1>
+        <p class="lede">I run the network at Executive Fiber end to end — routing, failover, provisioning, and the customer-facing website — as the sole engineer behind the infrastructure.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#projects">View the work</a>
+          <a class="btn btn-ghost" href="#offer">What I can offer</a>
+          <a class="btn btn-ghost" href="#contact">Get in touch</a>
+        </div>
+      </div>
+
+      <div class="topo">
+        <div class="topo-head">
+          <span class="lbl">core-network.map</span>
+          <span class="status-pill"><i></i>active</span>
+        </div>
+        <svg class="topo-svg" viewBox="0 0 300 150" xmlns="http://www.w3.org/2000/svg">
+          <line class="link link-active" x1="150" y1="75" x2="60" y2="30"/>
+          <line class="link link-active" x1="150" y1="75" x2="60" y2="120"/>
+          <line class="link" x1="150" y1="75" x2="240" y2="30"/>
+          <line class="link" x1="150" y1="75" x2="240" y2="120"/>
+          <line class="link" x1="60" y1="30" x2="20" y2="30"/>
+          <line class="link" x1="60" y1="120" x2="20" y2="120"/>
+          <line class="link" x1="240" y1="30" x2="280" y2="30"/>
+          <line class="link" x1="240" y1="120" x2="280" y2="120"/>
+          <circle class="node node-core" cx="150" cy="75" r="14"/>
+          <circle class="node" cx="60" cy="30" r="9"/>
+          <circle class="node" cx="60" cy="120" r="9"/>
+          <circle class="node" cx="240" cy="30" r="9"/>
+          <circle class="node" cx="240" cy="120" r="9"/>
+          <text x="150" y="97" text-anchor="middle">RouterOS</text>
+          <text x="60" y="18" text-anchor="middle">WAN A</text>
+          <text x="60" y="140" text-anchor="middle">WAN B</text>
+          <text x="240" y="18" text-anchor="middle">VLAN</text>
+          <text x="240" y="140" text-anchor="middle">ONT</text>
+        </svg>
+        <div class="topo-rows">
+          <div><span>Platform</span><span>MikroTik RouterOS</span></div>
+          <div><span>Failover</span><span>Multi-WAN, PCC</span></div>
+          <div><span>Engineer count</span><span>1</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="wrap">
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">About</h2></div>
+    <p class="about-body">
+      I'm a Network Engineer based in Nairobi, Kenya, currently running the network for <strong>Executive Fiber</strong>, an ISP operating under its own brand. I'm the sole engineer behind the infrastructure — responsible for everything from routing and failover design to fault diagnosis and customer connectivity.
+      My background is a Bachelor's degree in Applied Computing from KCA University, with coursework spanning network administration, cybersecurity, and software development. Outside of pure network engineering, I also build and maintain the company's website, so I move comfortably between the router console and the front end.
+    </p>
+  </section>
+
+  <section id="offer" class="wrap">
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">What I offer</h2></div>
+    <div class="projects">
+      <div class="card">
+        <div class="card-tag">Network engineering</div>
+        <h3>ISP &amp; network infrastructure</h3>
+        <p>Design, deployment, and day-to-day management of MikroTik RouterOS networks — multi-WAN failover, VLAN setup, fiber ONT provisioning, and fault diagnosis for live, customer-facing infrastructure.</p>
+        <div class="tag-row">
+          <span class="tag">Multi-WAN &amp; failover</span>
+          <span class="tag">VLAN / NAT</span>
+          <span class="tag">Fault diagnosis</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">Web development</div>
+        <h3>Business websites</h3>
+        <p>Clean, responsive multi-page sites built in plain HTML/CSS — pricing and services pages, contact forms, and small business landing pages that are fast and easy to maintain.</p>
+        <div class="tag-row">
+          <span class="tag">HTML / CSS</span>
+          <span class="tag">Responsive UI</span>
+          <span class="tag">Forms &amp; integrations</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="wrap">
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">Experience</h2></div>
+    <div class="job">
+      <div class="job-meta">
+        2024 — Present<br>Nairobi, Kenya
+      </div>
+      <div>
+        <div class="job-role">Network Engineer</div>
+        <div class="job-org">Executive Fiber</div>
+        <ul>
+          <li>Sole network engineer responsible for the full ISP network: design, deployment, monitoring, and troubleshooting of all infrastructure.</li>
+          <li>Configure and maintain MikroTik RouterOS devices spanning routing and switching hardware, covering VLANs, DHCP, and SFP/fiber ONT connectivity.</li>
+          <li>Design and implement multi-WAN load balancing and automatic failover across upstream providers using PCC mangle rules, per-table routing, and Netwatch health checks.</li>
+          <li>Diagnose and resolve network faults independently, including SFP port instability, routing/API errors, and DHCP/VLAN misconfigurations.</li>
+          <li>Manage VLAN tagging and NAT/masquerade configuration for fiber ONT customer connections, and support provisioning automation covering SNMP, RADIUS, and NAT rules.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="wrap">
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">Projects</h2></div>
+    <div class="projects">
+      <div class="card">
+        <div class="card-tag">Infrastructure</div>
+        <h3>Executive Fiber core network</h3>
+        <p>Designed and operate the ISP's core routing layer on MikroTik RouterOS — multi-WAN failover, VLAN-tagged fiber ONT connectivity, and health-checked route failover, built and maintained solo.</p>
+        <div class="tag-row">
+          <span class="tag">MikroTik RouterOS</span>
+          <span class="tag">PCC / Multi-WAN</span>
+          <span class="tag">Netwatch</span>
+          <span class="tag">VLAN / NAT</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-tag">Web development</div>
+        <h3>Executive Fiber website</h3>
+        <p>Built a multi-page marketing and customer site in plain HTML/CSS, including a pricing toggle, animated UI elements, a team portrait section, and form handling via Netlify Forms.</p>
+        <div class="tag-row">
+          <span class="tag">HTML / CSS</span>
+          <span class="tag">Netlify Forms</span>
+          <span class="tag">Responsive UI</span>
+        </div>
+        <a class="card-link" href="card.html">View digital card</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills" class="wrap">
+    <div class="sec-head"><span class="sec-num">05</span><h2 class="sec-title">Technical skills</h2></div>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <div class="lbl">Networking</div>
+        <div class="skill-list">
+          <span>TCP/IP</span><span>DNS</span><span>DHCP</span><span>VLANs</span>
+          <span>Multi-WAN routing &amp; failover</span><span>MikroTik RouterOS</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="lbl">Security</div>
+        <div class="skill-list">
+          <span>Cybersecurity principles</span><span>Network hardening fundamentals</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="lbl">Programming</div>
+        <div class="skill-list">
+          <span>Python</span><span>Java</span><span>SQL</span><span>HTML/CSS</span><span>JavaScript</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="lbl">Systems &amp; tools</div>
+        <div class="skill-list">
+          <span>Windows</span><span>Linux</span><span>Wireshark</span><span>VMware</span><span>Git</span><span>MySQL</span><span>Oracle</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education" class="wrap">
+    <div class="sec-head"><span class="sec-num">06</span><h2 class="sec-title">Education</h2></div>
+    <div class="edu-role">Bachelor of Science in Applied Computing</div>
+    <div class="edu-org">KCA University</div>
+    <div class="edu-meta">Dec 2020 — Apr 2024</div>
+    <div class="edu-list">Relevant coursework: Network Administration, Cybersecurity Principles, Software Development, Database Management</div>
+  </section>
+
+  <section id="contact" class="wrap">
+    <div class="sec-head"><span class="sec-num">07</span><h2 class="sec-title">Contact</h2></div>
+    <div class="contact-panel">
+      <div>
+        <h2>Let's talk networks.</h2>
+        <p>Open to network engineering roles and web projects.</p>
+      </div>
+      <div class="contact-links">
+        <a class="btn btn-primary" href="mailto:iannalwari947@gmail.com">Email me</a>
+        <a class="btn btn-ghost" href="tel:+254740066302">Call</a>
+      </div>
+    </div>
+
+    <div class="socials">
+      <div class="lbl">Find me online</div>
+      <div class="social-list">
+        <a href="https://wa.me/254797150692" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://web.facebook.com/profile.php?id=100066694733248" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://www.tiktok.com/@executivefiber" target="_blank" rel="noopener">TikTok</a>
+        <a href=https://www.youtube.com/@tech_hub947 target="_blank" rel="noopener">YouTube</a>
+        <a href="https://www.instagram.com/mcdavid.ian/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://x.com/YOUR_X" target="_blank" rel="noopener">X (Twitter)</a>
+        <a href="https://linkedin.com/in/YOUR_LINKEDIN" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/Iannmc" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 Ian Nalwari — Nairobi, Kenya</footer>
+
+<script>
+  const toggle = document.getElementById('navtoggle');
+  const links = document.getElementById('navlinks');
+  toggle.addEventListener('click', () => {
+    const isOpen = links.classList.toggle('open');
+    toggle.textContent = isOpen ? '✕' : '☰';
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    links.classList.remove('open');r
+    toggle.textContent = '☰';
+  }));
+</script>
+
+</body>
+</html>
